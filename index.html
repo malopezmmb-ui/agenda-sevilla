@@ -595,7 +595,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     var v=CATBASE[c];
     if(!v){v='--c-x'+i;document.documentElement.style.setProperty(v,'hsl('+((i*137)%360)+' 62% 42%)')}
     CATS.push([c,v]);CATVAR[c]=v});
-  // Etiquetas por palabras clave (HEURÍSTICO: se infieren del título/sala, pueden fallar)
+  // Etiquetas por palabras clave (HEURÍSTICO: se infieren del título/lugar, pueden fallar)
   var TAGS=[['Zambomba',/zambomba/],['Navidad',/navidad|belen|villancico|reyes magos|cabalgata/],['Tributo',/tributo|tribute|homenaje a|candlelight/],['Concierto',/concierto|recital|gira|en directo/],['Musical',/musical/],['Humor',/humor|comedia|monologo|monólogo|clown|stand.?up/],['Ópera',/opera|ópera|zarzuela/],['Jazz',/jazz|blues|swing/],['Flamenco',/flamenc|cante|tablao|bulería|seguirilla/],['Infantil',/infantil|ninos|niños|familiar|cuentacuentos|titeres|títeres/],['Visita guiada',/visita|ruta |paseo guiado|guiad/],['Taller',/taller|workshop|curso/],['Mercadillo',/mercadillo|mercado|rastro|feria/],['Charla',/charla|conferencia|coloquio|presentaci|mesa redonda/],['Danza',/danza|ballet|baile/],['Cine',/cine|pelicula|película|proyecci/]];
   EV.forEach(function(e){var s=(e.t+' '+e.v).toLowerCase(),r=[];TAGS.forEach(function(t){if(t[1].test(s))r.push(t[0])});e.tg=r});
   var ZONES=['Sevilla capital','Aljarafe y área','Resto de la provincia'];
@@ -745,7 +745,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     return '<article class="ev'+(mk?' marked':'')+(ch&&ch.estado==='cancelado'?' canc':'')+(wd?' wd':'')+'" style="--cc:var('+cv+')">'+
       '<div class="hora'+(e.h?'':' nh')+'">'+(wd?'<span class="hd">'+DIAS3[pd(e.d).getDay()]+' '+pd(e.d).getDate()+' '+MESES[pd(e.d).getMonth()].slice(0,3)+'</span>':'')+(e.h?esc(e.h):'s/h')+'</div>'+
       '<div class="body"><div class="tit">'+esc(e.t)+'</div>'+
-      '<div class="l2">'+esc(e.v||'Sala sin leer')+(ao?' · '+esc(ao.s==='c'?ao.a+' †':ao.a.replace(/\s*\(según[^)]*\)/,'')):' · <span class="pend">dirección pendiente</span>')+'</div>'+
+      '<div class="l2">'+esc(e.v||'Lugar sin leer')+(ao?' · '+esc(ao.s==='c'?ao.a+' †':ao.a.replace(/\s*\(según[^)]*\)/,'')):' · <span class="pend">dirección pendiente</span>')+'</div>'+
       '<div class="l3">'+(e.p?'<b class="pp'+(isFree(e)?' fr':'')+'">'+esc(e.p)+'</b>':'<a class="pp np" href="'+esc(e.k||e.l||'#')+'" target="_blank" rel="noopener">Ver precio ↗</a>')+ent+mapsA(e.v,ao,e.z)+'</div>'+
       '<div class="tags">'+cht+'<span class="tag cat">'+ic(e.c)+' '+esc(e.c)+'</span>'+(isFree(e)?'<span class="tag free">gratis</span>':'')+'<span class="tag '+(e.s==='oficial'?'of':'agg')+'">'+esc(e.s)+'</span>'+(e.ap?'<span class="tag agg">aprox.</span>':'')+(e.x?'<span class="tag agg">búsqueda</span>':'')+'</div></div>'+
       '<div class="side"><button class="star ico" data-id="'+esc(id)+'" aria-pressed="'+mk+'" aria-label="'+(mk?'Quitar de iremos':'Marcar iremos')+'">'+(mk?'★':'☆')+'</button>'+
@@ -805,7 +805,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
   function mini(e){
     var id=eid(e),mk=!!st.marks[id],cv=CATVAR[e.c]||'--c-otros',d=pd(e.d),ao=addrObj(e.v);
     return '<article class="mini" style="--cc:var('+cv+')"><div class="mt"><div class="dd"><b>'+d.getDate()+'</b><span>'+DIAS3[d.getDay()]+' '+MESES[d.getMonth()].slice(0,3)+'</span></div><div class="hh">'+(e.h?esc(e.h):'sin hora')+'</div><span class="tag cat">'+ic(e.c)+' '+esc(e.c)+'</span></div>'+
-      '<div class="mb"><div class="t">'+esc(e.t)+'</div><div class="v">'+esc(e.v||'Sala sin leer')+(ao?' · '+esc(ao.a.split(',')[0]):'')+'</div><div class="pr">'+(e.p?'<b class="pp">'+esc(e.p)+'</b>':'<span class="pend">ver precio en la ficha</span>')+'</div></div>'+
+      '<div class="mb"><div class="t">'+esc(e.t)+'</div><div class="v">'+esc(e.v||'Lugar sin leer')+(ao?' · '+esc(ao.a.split(',')[0]):'')+'</div><div class="pr">'+(e.p?'<b class="pp">'+esc(e.p)+'</b>':'<span class="pend">ver precio en la ficha</span>')+'</div></div>'+
       '<div class="ma"><button class="star" data-id="'+esc(id)+'" aria-pressed="'+mk+'">'+(mk?'★ Iremos':'☆ Iremos')+'</button>'+(e.l?'<a class="go" href="'+esc(e.l)+'" target="_blank" rel="noopener">Ver ↗</a>':'')+'</div></article>';
   }
   function rowSec(title,list,go,sub){
@@ -852,13 +852,13 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     h+=cartSec();
     h+='<h2 class="sec">Por tipo de plan</h2><p class="sec-sub">Periodo: <b>'+esc(label(bounds()))+'</b></p><div class="cards">';
     CATS.forEach(function(c){var l=list.filter(function(e){return e.c===c[0]}); if(!l.length) return;
-      h+=card('big','cat::'+c[0],c[0],plural(l.length,'plan','planes'),plural(venuesOf(l).length,'sala','salas'),c[1])});
+      h+=card('big','cat::'+c[0],c[0],plural(l.length,'plan','planes'),plural(venuesOf(l).length,'lugar','lugares'),c[1])});
     var tc={};list.forEach(function(e){e.tg.forEach(function(x){tc[x]=(tc[x]||0)+1})});
     var tk=Object.keys(tc).sort(function(x,y){return tc[y]-tc[x]});
     if(tk.length) h+='</div><h2 class="sec">Etiquetas</h2><p class="sec-sub">Se infieren de las palabras del título (heurístico: pueden fallar).</p><div class="seg">'+tk.map(function(x){return '<button class="chip" data-go="tag::'+esc(x)+'">'+esc(x)+' <small>'+tc[x]+'</small></button>'}).join('')+'</div><div class="cards" style="display:none">';
     h+='</div><h2 class="sec">Por zona</h2><div class="cards">';
     ZONES.forEach(function(z){var l=list.filter(function(e){return e.z===z}); if(!l.length) return;
-      h+=card('','zone::'+z,z,plural(l.length,'plan','planes'),plural(venuesOf(l).length,'sala','salas'),null)});
+      h+=card('','zone::'+z,z,plural(l.length,'plan','planes'),plural(venuesOf(l).length,'lugar','lugares'),null)});
     h+='</div><h2 class="sec">Lugares con más planes</h2><div class="cards">'+venuesOf(list).slice(0,6).map(function(v){var ao=addrObj(v.name);return '<button class="card vcard small" data-go="venue::'+esc(v.name)+'"><b>'+esc(v.name)+'</b><span class="n">'+plural(v.list.length,'plan','planes')+'</span><span class="d">'+(ao?esc(ao.a):'dirección pendiente')+'</span></button>'}).join('')+'</div>';
     return h;
   }
@@ -866,13 +866,13 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     var l=periodList().filter(function(e){return e.c===cat});
     return '<h2 class="sec">'+esc(cat)+'</h2>'+periodBar()+
       '<div class="cards" style="margin-bottom:14px">'+card('all','catall::'+cat,'Ver todos los planes de '+cat,plural(l.length,'plan','planes'),'Ordenados por día',null,'Ver lista →')+'</div>'+
-      '<h2 class="sec" style="font-size:19px">Elige sala</h2>'+venueCards(l);
+      '<h2 class="sec" style="font-size:19px">Elige lugar</h2>'+venueCards(l);
   }
   function viewZone(z){
     var l=periodList().filter(function(e){return e.z===z});
     return '<h2 class="sec">'+esc(z)+'</h2>'+periodBar()+
       '<div class="cards" style="margin-bottom:14px">'+card('all','zoneall::'+z,'Ver todos los planes de la zona',plural(l.length,'plan','planes'),'Ordenados por día',null,'Ver lista →')+'</div>'+
-      '<h2 class="sec" style="font-size:19px">Elige sala</h2>'+venueCards(l);
+      '<h2 class="sec" style="font-size:19px">Elige lugar</h2>'+venueCards(l);
   }
   function listView(title,list,extra){
     var ao=extra&&extra.venue?addrObj(extra.venue):null;
@@ -880,7 +880,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     if(extra&&extra.venue) h+='<p class="sec-sub">'+(ao?esc(ao.a):'Dirección pendiente de verificar')+(ao&&ao.s==='c'?' († fuente secundaria, indicada en la dirección)':'')+'</p>';
     h+='<p class="sum">'+plural(list.length,'plan','planes')+(extra&&extra.noPeriod?'':' · '+esc(label(bounds())))+'</p>';
     var g=groupSeries(list);
-    return h+(g||'<div class="empty">'+(extra&&extra.all?'Esta sala no tiene planes cargados en la agenda.':'No hay planes aquí en este periodo. Prueba otro periodo arriba.')+'</div>');
+    return h+(g||'<div class="empty">'+(extra&&extra.all?'Este lugar no tiene planes cargados en la agenda.':'No hay planes aquí en este periodo. Prueba otro periodo arriba.')+'</div>');
   }
   function quickList(k){
     var b0=base(),a,z;
@@ -1115,7 +1115,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     
     var nv=false;
     document.getElementById('zones').className='tiles';
-    document.getElementById('zones').innerHTML='<button class="tile" data-of="0" aria-pressed="'+(!st.of)+'"><b>Todas</b><small>oficial + agregador</small></button><button class="tile" data-of="1" aria-pressed="'+st.of+'"><b>Solo oficial</b><small>webs de cada sala</small></button><button class="tile" data-free="1" aria-pressed="'+st.free+'"><b>Solo gratis</b><small>solo si el precio está leído</small></button>'+
+    document.getElementById('zones').innerHTML='<button class="tile" data-of="0" aria-pressed="'+(!st.of)+'"><b>Todas</b><small>oficial + agregador</small></button><button class="tile" data-of="1" aria-pressed="'+st.of+'"><b>Solo oficial</b><small>webs de cada lugar</small></button><button class="tile" data-free="1" aria-pressed="'+st.free+'"><b>Solo gratis</b><small>solo si el precio está leído</small></button>'+
       (nv?'<button class="tile" data-nav="-1"><b>← Anterior</b><small>periodo previo</small></button><button class="tile" data-nav="0"><b>Hoy</b><small>volver al inicio</small></button><button class="tile" data-nav="1"><b>Siguiente →</b><small>periodo próximo</small></button>':'');
     document.getElementById('looks').className='tiles';
     document.getElementById('looks').innerHTML=LOOKS.map(function(l){return '<button class="tile look" data-look="'+l[0]+'" aria-pressed="'+(look===l[0])+'"><i style="background:'+l[2]+'"></i><b>'+l[1]+'</b></button>'}).join('');
