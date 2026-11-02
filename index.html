@@ -386,7 +386,7 @@ a.card{text-decoration:none;color:inherit;display:flex;flex-direction:column}
 <nav class="tabbar" aria-label="Navegación"><div class="tabin">
 <button data-tab="home"><span class="ic">⌂</span>Inicio</button>
 <button data-tab="cal"><span class="ic">▦</span>Calendario</button>
-<button data-tab="salas"><span class="ic">🏛️</span>Salas</button>
+<button data-tab="salas"><span class="ic">🏛️</span>Lugares</button>
 <button data-tab="marks"><span class="ic">★<em id="nm"></em></span>Marcados</button>
 <button data-tab="send" id="open-send2"><span class="ic">✉</span>Informe</button>
 </div></nav>
@@ -859,7 +859,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     h+='</div><h2 class="sec">Por zona</h2><div class="cards">';
     ZONES.forEach(function(z){var l=list.filter(function(e){return e.z===z}); if(!l.length) return;
       h+=card('','zone::'+z,z,plural(l.length,'plan','planes'),plural(venuesOf(l).length,'sala','salas'),null)});
-    h+='</div><h2 class="sec">Salas con más planes</h2><div class="cards">'+venuesOf(list).slice(0,6).map(function(v){var ao=addrObj(v.name);return '<button class="card vcard small" data-go="venue::'+esc(v.name)+'"><b>'+esc(v.name)+'</b><span class="n">'+plural(v.list.length,'plan','planes')+'</span><span class="d">'+(ao?esc(ao.a):'dirección pendiente')+'</span></button>'}).join('')+'</div>';
+    h+='</div><h2 class="sec">Lugares con más planes</h2><div class="cards">'+venuesOf(list).slice(0,6).map(function(v){var ao=addrObj(v.name);return '<button class="card vcard small" data-go="venue::'+esc(v.name)+'"><b>'+esc(v.name)+'</b><span class="n">'+plural(v.list.length,'plan','planes')+'</span><span class="d">'+(ao?esc(ao.a):'dirección pendiente')+'</span></button>'}).join('')+'</div>';
     return h;
   }
   function viewCat(cat){
@@ -988,18 +988,28 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     {n:'Casino de la Exposición',loc:'Sevilla',a:'',k:'casino de la exposicion',w:'https://www.google.com/maps/search/?api=1&query=Casino%20de%20la%20Exposici%C3%B3n%20Sevilla',wl:'Ver en el mapa',s:'u',nota:'Lista aportada por Miguel (museos y salas de exposiciones); dirección sin verificar, programación sin leer.'},
     {n:'Espacio Derivado',loc:'Sevilla',a:'Zona Plaza del Cristo de Burgos, Sevilla',k:'derivado',w:'https://www.google.com/maps/search/?api=1&query=Espacio%20Derivado%20Sevilla',wl:'Ver en el mapa',s:'u',nota:'Lista aportada por Miguel (museos y salas de exposiciones); dirección sin verificar, programación sin leer.'}
   ];
+  function tipoX(s){var n=norm(s.n);
+    if(/museo del baile/.test(n))return 'Exposiciones';
+    if(/tablao|flamenco|guitarra/.test(n))return 'Flamenco';
+    if(/museo|bellas artes|casa fabiola|antiquarium|casa de la ciencia|santa clara|sala murillo|unicaja|casa de la provincia|casino de la exposicion|derivado|caac/.test(n))return 'Exposiciones';
+    if(/estadio|stadium|auditorio|palacio de la musica|sala |fun club|supra|long rock|assejazz/.test(n))return 'Música';
+    if(/teatro/.test(n))return 'Teatro';
+    return 'Otros'}
   function viewSalas(){
-    var qs=norm(st.qs||''),mq=function(t){return !qs||norm(t).indexOf(qs)>=0};
-    var vs0=venuesOf(EV),have={};vs0.forEach(function(v){have[norm(v.name)]=1});var vs=vs0.filter(function(v){return mq(v.name+' '+v.zone)});
-    var by={};vs.forEach(function(v){var cc={};v.list.forEach(function(e){cc[e.c]=(cc[e.c]||0)+1});var c=Object.keys(cc).sort(function(a,b){return cc[b]-cc[a]})[0]||'Otros';(by[c]=by[c]||[]).push(v)});
-    var h='<h2 class="sec">Salas y espacios</h2><p class="sec-sub">Todas las salas con planes en la agenda ('+vs.length+(qs?' que coinciden con «'+esc(st.qs)+'»':'')+'), agrupadas por el tipo de plan que más tienen. Toca una para ver su programación.</p><input id="qs" type="search" value="'+esc(st.qs||'')+'" placeholder="Buscar sala por nombre…" aria-label="Buscar sala" autocomplete="off" style="width:100%;box-sizing:border-box;margin:4px 0 6px;padding:11px 14px;font:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg)">';
-    CATS.forEach(function(c){var l=by[c[0]];if(!l)return;
-      h+='<h3 class="sec" style="font-size:18px;margin-top:18px">'+ic(c[0])+' '+esc(c[0])+' · '+plural(l.length,'sala','salas')+'</h3><div class="cards">'+l.map(function(v){var ao=addrObj(v.name);
-        return card('','venue::'+v.name,v.name,plural(v.list.length,'plan','planes'),esc(v.zone)+'<br>'+(ao?esc(ao.a)+(ao.s==='c'?' †':''):'<span class="pend">dirección pendiente</span>'),null)}).join('')+'</div>'});
-    var x=SALAS_X.filter(function(s){return mq(s.n+' '+s.loc)}).filter(function(s){return s.k?!vs0.some(function(v){return new RegExp(s.k).test(norm(v.name))}):!have[norm(s.n)]});
-    if(x.length){h+='<h3 class="sec" style="font-size:18px;margin-top:22px">Salas sin planes cargados aún · '+x.length+'</h3><p class="sec-sub">Sin planes cargados todavía: son salas de Red Escena (directorio) y de la lista que aportó Miguel. Solo llevan el enlace para mirarlas; las direcciones de la lista no están verificadas.</p><div class="cards">'+x.map(function(s){
-      return '<a class="card" href="'+esc(s.w)+'" target="_blank" rel="noopener"><b>'+esc(s.n)+'</b><span class="n">'+esc(s.loc)+'</span><span class="d">'+(s.a?esc(s.a)+'<br>':'<span class="pend">dirección pendiente</span><br>')+(s.nota?esc(s.nota)+'<br>':'')+'<b style="color:var(--azul)">'+esc(s.wl)+' ↗</b></span></a>'}).join('')+'</div>'}
-    if(qs&&!vs.length&&!x.length)h+='<p class="sec-sub">Ninguna sala coincide con «'+esc(st.qs)+'».</p>';
+    var qs=norm(st.qs||''),mq=function(t){return !qs||norm(t).indexOf(qs)>=0},ft=st.ft||'';
+    var vs0=venuesOf(EV),have={};vs0.forEach(function(v){have[norm(v.name)]=1});var vs=vs0.filter(function(v){return v.name!=='(sin sala)'&&mq(v.name+' '+v.zone)});
+    var items=[];
+    vs.forEach(function(v){var cc={};v.list.forEach(function(e){cc[e.c]=(cc[e.c]||0)+1});var c=Object.keys(cc).sort(function(a,b){return cc[b]-cc[a]})[0]||'Otros';items.push({c:c,v:v})});
+    SALAS_X.filter(function(s){return mq(s.n+' '+s.loc)}).filter(function(s){return s.k?!vs0.some(function(v){return new RegExp(s.k).test(norm(v.name))}):!have[norm(s.n)]}).forEach(function(s){items.push({c:tipoX(s),x:s})});
+    var cn={};items.forEach(function(i){cn[i.c]=(cn[i.c]||0)+1});
+    var lab=function(c){return c==='Exposiciones'?'Exposiciones y museos':c};
+    var h='<h2 class="sec">Lugares</h2><p class="sec-sub">Teatros, salas de concierto, tablaos, museos y salas de exposiciones ('+items.length+(qs?' que coinciden con «'+esc(st.qs)+'»':'')+'). El tipo de los lugares con planes cargados es el que más se repite en sus planes; el de los que aún no tienen planes sale de su nombre (puede fallar). Toca uno para ver su programación.</p><input id="qs" type="search" value="'+esc(st.qs||'')+'" placeholder="Buscar lugar por nombre…" aria-label="Buscar lugar" autocomplete="off" style="width:100%;box-sizing:border-box;margin:4px 0 6px;padding:11px 14px;font:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg)">';
+    h+='<div class="seg" style="margin:6px 0 4px"><button data-sft="" aria-pressed="'+(!ft)+'">Todos · '+items.length+'</button>'+CATS.filter(function(c){return cn[c[0]]}).map(function(c){return '<button data-sft="'+esc(c[0])+'" aria-pressed="'+(ft===c[0])+'">'+ic(c[0])+' '+esc(lab(c[0]))+' · '+cn[c[0]]+'</button>'}).join('')+'</div>';
+    CATS.forEach(function(c){if(ft&&ft!==c[0])return;var l=items.filter(function(i){return i.c===c[0]});if(!l.length)return;
+      h+='<h3 class="sec" style="font-size:18px;margin-top:18px">'+ic(c[0])+' '+esc(lab(c[0]))+' · '+l.length+'</h3><div class="cards">'+l.map(function(i){
+        if(i.v){var v=i.v,ao=addrObj(v.name);return card('','venue::'+v.name,v.name,plural(v.list.length,'plan','planes'),esc(v.zone)+'<br>'+(ao?esc(ao.a)+(ao.s==='c'?' †':''):'<span class="pend">dirección pendiente</span>'),null)}
+        var s=i.x;return '<a class="card" href="'+esc(s.w)+'" target="_blank" rel="noopener"><b>'+esc(s.n)+'</b><span class="n">sin planes cargados · '+esc(s.loc)+'</span><span class="d">'+(s.a?esc(s.a)+'<br>':'<span class="pend">dirección pendiente</span><br>')+(s.nota?esc(s.nota)+'<br>':'')+'<b style="color:var(--azul)">'+esc(s.wl)+' ↗</b></span></a>'}).join('')+'</div>'});
+    if(!items.length)h+='<p class="sec-sub">Ningún lugar coincide con «'+esc(st.qs)+'».</p>';
     return h;
   }
   function viewMarks(){
@@ -1153,7 +1163,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     else if(k==='period'){c.l='Periodo elegido'}
     else if(k==='quick'){c.l=a==='hoy'?'Hoy':a==='semana'?'Próximos 7 días':'Fin de semana'}
     else if(k==='tag'){c.l=a}
-    else if(k==='cal'){c.l='Calendario'} else if(k==='marks'){c.l='Marcados'} else if(k==='salas'){c.l='Salas'}
+    else if(k==='cal'){c.l='Calendario'} else if(k==='marks'){c.l='Marcados'} else if(k==='salas'){c.l='Lugares'}
     st.stack.push(c); st.day=null; pushH(); render(); window.scrollTo({top:0,behavior:'smooth'});
   }
   document.addEventListener('click',function(ev){
@@ -1164,6 +1174,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     if(t.id==='back'){if(hc>0)history.back();else doBack();return}
     if(t.dataset.t!==undefined){var c=window.__TC[+t.dataset.t];st.r=c[0]==='Todo'?'temp':'custom';st.from=iso(c[1]);st.to=iso(c[2]);st.q='';document.getElementById('q').value='';st.stack=[{k:'home',l:'Inicio'}];render();return}
     if(t.dataset.qs){st.q=t.dataset.qs;document.getElementById('q').value=st.q;pushH();render();window.scrollTo({top:0});return}
+    if(t.dataset.sft!==undefined&&t.hasAttribute('data-sft')){st.ft=t.dataset.sft;render();return}
     if(t.dataset.fclr){if(t.dataset.fclr==='free')st.free=false;if(t.dataset.fclr==='of')st.of=false;render();return}
     if(t.dataset.free){st.free=!st.free;render();return}
     if(t.id==='totop'){window.scrollTo({top:0,behavior:'smooth'});return}
@@ -1172,7 +1183,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     if(t.id==='open-f'||t.id==='open-f2'||t.id==='open-f3'){st.fopen=!st.fopen;render();return}
     if(t.dataset.nc){st.q='';document.getElementById('q').value='';st.stack=[{k:'home',l:'Inicio'}];st.hc=t.dataset.nc==='Todo'?null:t.dataset.nc;render();return}
     if(t.dataset.tab){var tb=t.dataset.tab;if(tb==='send'){st.sendOpen=!st.sendOpen;render();if(st.sendOpen)document.getElementById('sendbox').scrollIntoView({behavior:'smooth',block:'start'});return}
-      st.sendOpen=false;st.q='';document.getElementById('q').value='';st.stack=[{k:'home',l:'Inicio'}];if(tb==='marks'){st.stack.push({k:'marks',l:'Marcados'});pushH()}if(tb==='salas'){st.stack.push({k:'salas',l:'Salas'});pushH()}st.day=null;render();if(tb==='cal'){var hcx=document.getElementById('hcal');if(hcx)hcx.scrollIntoView({behavior:'smooth',block:'start'})}else window.scrollTo({top:0,behavior:'smooth'});return}
+      st.sendOpen=false;st.q='';document.getElementById('q').value='';st.stack=[{k:'home',l:'Inicio'}];if(tb==='marks'){st.stack.push({k:'marks',l:'Marcados'});pushH()}if(tb==='salas'){st.stack.push({k:'salas',l:'Lugares'});pushH()}st.day=null;render();if(tb==='cal'){var hcx=document.getElementById('hcal');if(hcx)hcx.scrollIntoView({behavior:'smooth',block:'start'})}else window.scrollTo({top:0,behavior:'smooth'});return}
     if(t.id==='open-send'){st.sendOpen=!st.sendOpen;render();if(st.sendOpen)document.getElementById('sendbox').scrollIntoView({behavior:'smooth',block:'start'});return}
     if(t.id==='cp'){copy(reportText(false),'Texto copiado. Pégalo en el correo o donde quieras.');return}
     if(t.id==='cpa'){var to=[];if(st.rcpt.m)to.push('');if(st.rcpt.r)to.push('');copy(to.join(', '),'Direcciones copiadas: '+to.join(', '));return}
