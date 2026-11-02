@@ -189,7 +189,7 @@ body{padding-bottom:84px}
 .mini.more2 b{font:800 30px var(--display)}
 .vcard{flex:0 0 min(230px,72%);scroll-snap-align:start}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -4px 16px rgba(15,28,46,.10)}
-.tabin{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tabin{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
 .tabin button{border:0;background:none;color:var(--muted);font:700 12.5px var(--body);padding:8px 4px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
 .tabin .ic{font-size:21px;line-height:1;position:relative}
 .tabin em{position:absolute;top:-6px;right:-14px;background:var(--sol);color:#2a1d00;font:800 11px var(--body);border-radius:9px;padding:1px 5px;font-style:normal}
@@ -342,6 +342,9 @@ details.ser .evg{padding:8px}
 .mini .ico{width:44px;height:44px;border:0;background:none;font:700 22px var(--body);color:var(--azul);cursor:pointer}
 
 .inst{margin-top:14px;border:1px solid var(--line,#d8d2c4);border-radius:12px;padding:10px 12px}.inst summary{font-weight:700;cursor:pointer}.inst ol{margin:8px 0 6px 18px;padding:0;line-height:1.5}
+
+a.card{text-decoration:none;color:inherit;display:flex;flex-direction:column}
+.tabin button{font-size:12px}
 </style>
 
 <header class="bar"><div class="wrap barin">
@@ -382,6 +385,7 @@ details.ser .evg{padding:8px}
 <nav class="tabbar" aria-label="Navegación"><div class="tabin">
 <button data-tab="home"><span class="ic">⌂</span>Inicio</button>
 <button data-tab="cal"><span class="ic">▦</span>Calendario</button>
+<button data-tab="salas"><span class="ic">🏛️</span>Salas</button>
 <button data-tab="marks"><span class="ic">★<em id="nm"></em></span>Marcados</button>
 <button data-tab="send" id="open-send2"><span class="ic">✉</span>Informe</button>
 </div></nav>
@@ -875,7 +879,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     if(extra&&extra.venue) h+='<p class="sec-sub">'+(ao?esc(ao.a):'Dirección pendiente de verificar')+(ao&&ao.s==='c'?' († fuente secundaria, indicada en la dirección)':'')+'</p>';
     h+='<p class="sum">'+plural(list.length,'plan','planes')+(extra&&extra.noPeriod?'':' · '+esc(label(bounds())))+'</p>';
     var g=groupSeries(list);
-    return h+(g||'<div class="empty">No hay planes aquí en este periodo. Prueba otro periodo arriba.</div>');
+    return h+(g||'<div class="empty">'+(extra&&extra.all?'Esta sala no tiene planes cargados en la agenda.':'No hay planes aquí en este periodo. Prueba otro periodo arriba.')+'</div>');
   }
   function quickList(k){
     var b0=base(),a,z;
@@ -898,6 +902,30 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     h+='</div>';
     if(st.day){var ev=by[st.day]||[];h+='<section class="day" style="margin-top:22px">'+dayHead(pd(st.day),ev.length)+(ev.length?'<div class="evg">'+ev.map(evHtml).join('')+'</div>':'<div class="empty">Nada este día.</div>')+'</section>'}
     else h+='<div class="empty">Toca un día para ver sus planes.</div>';
+    return h;
+  }
+
+  var SALAS_X=[
+    {n:'Teatro Salvador Távora',loc:'Sevilla',a:'Avda. de Hytasa, 14 (Polígono Hytasa, C/ Lino 8), 41006 Sevilla',w:'https://www.teatrotavoradesevilla.com/',wl:'Web oficial',s:'o',nota:'Programación y entradas en su web (su taquilla online no he podido leerla desde aquí).'},
+    {n:'Teatro Centro Cultural La Atarazana',loc:'Bormujos',w:'https://www.redescena.net/escenario/2906/teatro-centro-cultural-la-atarazana/',wl:'Ficha en Red Escena',s:'d'},
+    {n:'Teatro Municipal Juan Diego',loc:'Bormujos',w:'https://www.redescena.net/escenario/3479/teatro-municipal-juan-diego/',wl:'Ficha en Red Escena',s:'d'},
+    {n:'Parque las Portadas',loc:'Bormujos',w:'https://www.redescena.net/escenario/3289/parque-las-portadas/',wl:'Ficha en Red Escena',s:'d'},
+    {n:'Palacio de la Música',loc:'Villanueva del Ariscal',w:'https://www.redescena.net/escenario/3288/palacio-de-la-musica/',wl:'Ficha en Red Escena',s:'d'},
+    {n:'Teatro Municipal de Salteras',loc:'Salteras',w:'https://www.redescena.net/escenario/3478/teatro-municipal-de-salteras/',wl:'Ficha en Red Escena',s:'d'},
+    {n:'Centro Cultural de la Villa',loc:'San José de La Rinconada',w:'https://www.redescena.net/escenario/2429/centro-cultural-de-la-villa/',wl:'Ficha en Red Escena',s:'d'},
+    {n:'Teatro Municipal Calixto Sánchez',loc:'Mairena del Alcor',w:'https://www.redescena.net/escenario/3301/teatro-municipal-calixto-sanchez/',wl:'Ficha en Red Escena',s:'d'},
+    {n:'Teatro de la Villa del Conocimiento y las Artes',loc:'Mairena del Alcor',w:'https://www.redescena.net/escenario/2911/teatro-de-la-villa-del-conocimiento-y-las-artes/',wl:'Ficha en Red Escena',s:'d'}
+  ];
+  function viewSalas(){
+    var vs=venuesOf(EV),have={};vs.forEach(function(v){have[norm(v.name)]=1});
+    var by={};vs.forEach(function(v){var cc={};v.list.forEach(function(e){cc[e.c]=(cc[e.c]||0)+1});var c=Object.keys(cc).sort(function(a,b){return cc[b]-cc[a]})[0]||'Otros';(by[c]=by[c]||[]).push(v)});
+    var h='<h2 class="sec">Salas y espacios</h2><p class="sec-sub">Todas las salas con planes en la agenda ('+vs.length+'), agrupadas por el tipo de plan que más tienen. Toca una para ver su programación.</p>';
+    CATS.forEach(function(c){var l=by[c[0]];if(!l)return;
+      h+='<h3 class="sec" style="font-size:18px;margin-top:18px">'+ic(c[0])+' '+esc(c[0])+' · '+plural(l.length,'sala','salas')+'</h3><div class="cards">'+l.map(function(v){var ao=addrObj(v.name);
+        return card('','venue::'+v.name,v.name,plural(v.list.length,'plan','planes'),esc(v.zone)+'<br>'+(ao?esc(ao.a)+(ao.s==='c'?' †':''):'<span class="pend">dirección pendiente</span>'),null)}).join('')+'</div>'});
+    var x=SALAS_X.filter(function(s){return !have[norm(s.n)]});
+    if(x.length){h+='<h3 class="sec" style="font-size:18px;margin-top:22px">Salas sin planes cargados aún · '+x.length+'</h3><p class="sec-sub">Las de Red Escena son un directorio de salas: no he leído su programación todavía. No son planes, solo el enlace para mirarla.</p><div class="cards">'+x.map(function(s){
+      return '<a class="card" href="'+esc(s.w)+'" target="_blank" rel="noopener"><b>'+esc(s.n)+'</b><span class="n">'+esc(s.loc)+'</span><span class="d">'+(s.a?esc(s.a)+'<br>':'<span class="pend">dirección pendiente</span><br>')+(s.nota?esc(s.nota)+'<br>':'')+'<b style="color:var(--azul)">'+esc(s.wl)+' ↗</b></span></a>'}).join('')+'</div>'}
     return h;
   }
   function viewMarks(){
@@ -939,12 +967,13 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
       case 'zone': return viewZone(c.a);
       case 'catall': return listView(c.a+' · todos los planes',periodList().filter(function(e){return e.c===c.a}));
       case 'zoneall': return listView(c.a+' · todos los planes',periodList().filter(function(e){return e.z===c.a}));
-      case 'venue': return listView(c.a,periodList().filter(function(e){return vkey(e.v)===c.a&&(!c.cat||e.c===c.cat)}),{venue:c.a});
+      case 'venue': return listView(c.a,(c.all?EV:periodList()).filter(function(e){return vkey(e.v)===c.a&&(!c.cat||e.c===c.cat)}),{venue:c.a,noPeriod:!!c.all,all:!!c.all});
       case 'period': return listView(label(bounds()),periodList(),{noPeriod:true});
       case 'quick': var q=quickList(c.a); return listView(q.title,q.list,{noPeriod:true});
       case 'tag': return listView('Etiqueta: '+c.a,periodList().filter(function(e){return e.tg.indexOf(c.a)>=0}));
       case 'cal': return viewCal();
       case 'marks': return viewMarks();
+      case 'salas': return viewSalas();
     }
     return viewHome();
   }
@@ -1022,7 +1051,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
       fb.innerHTML=f.length?'<span>Filtros activos (ocultan eventos):</span> '+f.join(' '):''})();
     document.getElementById('plabel').textContent=st.hv==='todo'?'Nov–dic':st.hv==='mes'?MESES[st.month[1]]:st.hv==='dia'?(b[0].getDate()+' '+M3(b[0])):(b[0].getMonth()===b[1].getMonth()?b[0].getDate()+'–'+b[1].getDate()+' '+M3(b[1]):b[0].getDate()+' '+M3(b[0])+' – '+b[1].getDate()+' '+M3(b[1]));
     document.getElementById('fpanel').hidden=!st.fopen;
-    var tk=st.sendOpen?'send':(cc.k==='cal'?'cal':(cc.k==='marks'?'marks':(st.stack.length===1?'home':'')));
+    var tk=st.sendOpen?'send':(cc.k==='cal'?'cal':(cc.k==='marks'?'marks':(cc.k==='salas'?'salas':(st.stack.length===1?'home':''))));
     document.querySelectorAll('.tabbar button').forEach(function(x){x.setAttribute('aria-pressed',x.dataset.tab===tk)});
     document.getElementById('nm').textContent=Object.keys(st.marks).length||'';
     document.getElementById('view').innerHTML=viewMain();
@@ -1046,11 +1075,11 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     var p=spec.split('::'),k=p[0],a=p[1]||'',prev=cur(),c={k:k,a:a};
     if(k==='cat'||k==='zone'){c.l=a}
     else if(k==='catall'||k==='zoneall'){c.l='Todos'}
-    else if(k==='venue'){c.l=a; if(prev.k==='cat') c.cat=prev.a}
+    else if(k==='venue'){c.l=a; if(prev.k==='cat') c.cat=prev.a; if(prev.k==='salas') c.all=true}
     else if(k==='period'){c.l='Periodo elegido'}
     else if(k==='quick'){c.l=a==='hoy'?'Hoy':a==='semana'?'Próximos 7 días':'Fin de semana'}
     else if(k==='tag'){c.l=a}
-    else if(k==='cal'){c.l='Calendario'} else if(k==='marks'){c.l='Marcados'}
+    else if(k==='cal'){c.l='Calendario'} else if(k==='marks'){c.l='Marcados'} else if(k==='salas'){c.l='Salas'}
     st.stack.push(c); st.day=null; pushH(); render(); window.scrollTo({top:0,behavior:'smooth'});
   }
   document.addEventListener('click',function(ev){
@@ -1069,7 +1098,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     if(t.id==='open-f'||t.id==='open-f2'||t.id==='open-f3'){st.fopen=!st.fopen;render();return}
     if(t.dataset.nc){st.q='';document.getElementById('q').value='';st.stack=[{k:'home',l:'Inicio'}];st.hc=t.dataset.nc==='Todo'?null:t.dataset.nc;render();return}
     if(t.dataset.tab){var tb=t.dataset.tab;if(tb==='send'){st.sendOpen=!st.sendOpen;render();if(st.sendOpen)document.getElementById('sendbox').scrollIntoView({behavior:'smooth',block:'start'});return}
-      st.sendOpen=false;st.q='';document.getElementById('q').value='';st.stack=[{k:'home',l:'Inicio'}];if(tb==='marks'){st.stack.push({k:'marks',l:'Marcados'});pushH()}st.day=null;render();if(tb==='cal'){var hcx=document.getElementById('hcal');if(hcx)hcx.scrollIntoView({behavior:'smooth',block:'start'})}else window.scrollTo({top:0,behavior:'smooth'});return}
+      st.sendOpen=false;st.q='';document.getElementById('q').value='';st.stack=[{k:'home',l:'Inicio'}];if(tb==='marks'){st.stack.push({k:'marks',l:'Marcados'});pushH()}if(tb==='salas'){st.stack.push({k:'salas',l:'Salas'});pushH()}st.day=null;render();if(tb==='cal'){var hcx=document.getElementById('hcal');if(hcx)hcx.scrollIntoView({behavior:'smooth',block:'start'})}else window.scrollTo({top:0,behavior:'smooth'});return}
     if(t.id==='open-send'){st.sendOpen=!st.sendOpen;render();if(st.sendOpen)document.getElementById('sendbox').scrollIntoView({behavior:'smooth',block:'start'});return}
     if(t.id==='cp'){copy(reportText(false),'Texto copiado. Pégalo en el correo o donde quieras.');return}
     if(t.id==='cpa'){var to=[];if(st.rcpt.m)to.push('');if(st.rcpt.r)to.push('');copy(to.join(', '),'Direcciones copiadas: '+to.join(', '));return}
