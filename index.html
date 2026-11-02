@@ -615,6 +615,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
    [/Museo de Bellas Artes/i,'Plaza del Museo, Sevilla (según Wikipedia, sin número)','c'],
    [/Espacio Santa Clara/i,'C/ Santa Clara, Sevilla (según Wikipedia, sin número)','c'],
    [/Casa de la Ciencia/i,'Pabellón de Perú, Av. de María Luisa, Sevilla (según Wikipedia)','c'],
+   [/Salvador T[aá]vora|Teatro T[aá]vora/i,'Avda. de Hytasa, 14 (Pol. Hytasa, C/ Lino 8), 41006 Sevilla (según teatrotavoradesevilla.com y Planomato)','o'],
    [/Teatro Central/i,'C/ José Gálvez 6, Isla de la Cartuja, Sevilla','o'],
    [/CAAC/i,'C/ Américo Vespucio 2, Cartuja, Sevilla','o'],
    [/CaixaForum/i,'C/ López Pintado (junto a Torre Sevilla), Sevilla','o'],
@@ -999,11 +1000,11 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     var qs=norm(st.qs||''),mq=function(t){return !qs||norm(t).indexOf(qs)>=0},ft=st.ft||'';
     var vs0=venuesOf(EV),have={};vs0.forEach(function(v){have[norm(v.name)]=1});var vs=vs0.filter(function(v){return v.name!=='(sin sala)'&&mq(v.name+' '+v.zone)});
     var items=[];
-    vs.forEach(function(v){var cc={};v.list.forEach(function(e){cc[e.c]=(cc[e.c]||0)+1});var c=Object.keys(cc).sort(function(a,b){return cc[b]-cc[a]})[0]||'Otros';items.push({c:c,v:v})});
+    vs.forEach(function(v){var cc={};v.list.forEach(function(e){cc[e.c]=(cc[e.c]||0)+1});var c=Object.keys(cc).sort(function(a,b){return cc[b]-cc[a]})[0]||'Otros';var nv=norm(v.name);if(/teatro/.test(nv)&&!/flamenco/.test(nv))c='Teatro';else if(/tablao/.test(nv))c='Flamenco';items.push({c:c,v:v})});
     SALAS_X.filter(function(s){return mq(s.n+' '+s.loc)}).filter(function(s){return s.k?!vs0.some(function(v){return new RegExp(s.k).test(norm(v.name))}):!have[norm(s.n)]}).forEach(function(s){items.push({c:tipoX(s),x:s})});
     var cn={};items.forEach(function(i){cn[i.c]=(cn[i.c]||0)+1});
     var lab=function(c){return c==='Exposiciones'?'Exposiciones y museos':c};
-    var h='<h2 class="sec">Lugares</h2><p class="sec-sub">Teatros, salas de concierto, tablaos, museos y salas de exposiciones ('+items.length+(qs?' que coinciden con «'+esc(st.qs)+'»':'')+'). El tipo de los lugares con planes cargados es el que más se repite en sus planes; el de los que aún no tienen planes sale de su nombre (puede fallar). Toca uno para ver su programación.</p><input id="qs" type="search" value="'+esc(st.qs||'')+'" placeholder="Buscar lugar por nombre…" aria-label="Buscar lugar" autocomplete="off" style="width:100%;box-sizing:border-box;margin:4px 0 6px;padding:11px 14px;font:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg)">';
+    var h='<h2 class="sec">Lugares</h2><p class="sec-sub">Teatros, salas de concierto, tablaos, museos y salas de exposiciones ('+items.length+(qs?' que coinciden con «'+esc(st.qs)+'»':'')+'). El tipo de los lugares con planes cargados es el que más se repite en sus planes; el de los que aún no tienen planes sale de su nombre (puede fallar); los que se llaman «Teatro…» van siempre a Teatro. Toca uno para ver su programación.</p><input id="qs" type="search" value="'+esc(st.qs||'')+'" placeholder="Buscar lugar por nombre…" aria-label="Buscar lugar" autocomplete="off" style="width:100%;box-sizing:border-box;margin:4px 0 6px;padding:11px 14px;font:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg)">';
     h+='<div class="seg" style="margin:6px 0 4px"><button data-sft="" aria-pressed="'+(!ft)+'">Todos · '+items.length+'</button>'+CATS.filter(function(c){return cn[c[0]]}).map(function(c){return '<button data-sft="'+esc(c[0])+'" aria-pressed="'+(ft===c[0])+'">'+ic(c[0])+' '+esc(lab(c[0]))+' · '+cn[c[0]]+'</button>'}).join('')+'</div>';
     CATS.forEach(function(c){if(ft&&ft!==c[0])return;var l=items.filter(function(i){return i.c===c[0]});if(!l.length)return;
       h+='<h3 class="sec" style="font-size:18px;margin-top:18px">'+ic(c[0])+' '+esc(lab(c[0]))+' · '+l.length+'</h3><div class="cards">'+l.map(function(i){
