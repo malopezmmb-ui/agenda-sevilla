@@ -817,7 +817,8 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
   }
   var MES3=function(s){var d=pd(s);return d.getDate()+' '+MESES[d.getMonth()].slice(0,3)};
   function cid(c){return 'c|'+String(c.t).slice(0,40)}
-  function cartList(){var b=bounds(),lo=iso(b[0]),hi=iso(b[1]);return CART.filter(function(c){if(st.of&&c.s!=='oficial')return false;if(st.free&&!isFree(c))return false;if(st.q){var w=norm(st.q).split(/\s+/).filter(Boolean),s=norm(c.t+' '+c.v+' '+c.c);for(var j=0;j<w.length;j++){if(s.indexOf(w[j])<0)return false}return true}if(!c.a)return true;return (c.b||c.a)>=lo})}
+  function ensureCat(c0){if(c0&&!CATVAR[c0]){var n=CATS.length;var v=CATBASE[c0]||('--c-y'+n);if(!CATBASE[c0])document.documentElement.style.setProperty(v,'hsl('+((n*137)%360)+' 62% 42%)');CATS.push([c0,v]);CATVAR[c0]=v}}
+  function cartList(){CART.forEach(function(c1){ensureCat(c1.c)});var b=bounds(),lo=iso(b[0]),hi=iso(b[1]);return CART.filter(function(c){if(st.of&&c.s!=='oficial')return false;if(st.free&&!isFree(c))return false;if(st.q){var w=norm(st.q).split(/\s+/).filter(Boolean),s=norm(c.t+' '+c.v+' '+c.c);for(var j=0;j<w.length;j++){if(s.indexOf(w[j])<0)return false}return true}if(!c.a)return true;return (c.b||c.a)>=lo})}
   function cartHtml(c){
     var id=cid(c),mk=!!st.marks[id],cv=CATVAR[c.c]||'--c-otros',ao=c.ad?{a:c.ad}:addrObj(c.v);
     return '<article class="mini cart" style="--cc:var('+cv+')"><div class="mt"><span class="tag agg">en cartel</span><div class="hh">'+(c.a?esc(MES3(c.a))+' → '+esc(MES3(c.b||c.a)):'fechas en el enlace')+'</div></div>'+
@@ -854,8 +855,8 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     h+=hCal()+hAgenda();
     h+=cartSec();
     h+='<h2 class="sec">Por tipo de plan</h2><p class="sec-sub">Periodo: <b>'+esc(label(bounds()))+'</b></p><div class="cards">';
-    CATS.forEach(function(c){var l=list.filter(function(e){return e.c===c[0]}); if(!l.length) return;
-      h+=card('big','cat::'+c[0],c[0],plural(l.length,'plan','planes'),plural(venuesOf(l).length,'lugar','lugares'),c[1])});
+    CATS.forEach(function(c){var l=list.filter(function(e){return e.c===c[0]}),cq=cartList().filter(function(x){return x.c===c[0]}); if(!l.length&&!cq.length) return;
+      h+=card('big','cat::'+c[0],c[0],plural(l.length,'plan','planes')+(cq.length?' + '+cq.length+' en cartel':''),plural(venuesOf(l).length,'lugar','lugares'),c[1])});
     var tc={};list.forEach(function(e){e.tg.forEach(function(x){tc[x]=(tc[x]||0)+1})});
     var tk=Object.keys(tc).sort(function(x,y){return tc[y]-tc[x]});
     if(tk.length) h+='</div><h2 class="sec">Etiquetas</h2><p class="sec-sub">Se infieren de las palabras del título (heurístico: pueden fallar).</p><div class="seg">'+tk.map(function(x){return '<button class="chip" data-go="tag::'+esc(x)+'">'+esc(x)+' <small>'+tc[x]+'</small></button>'}).join('')+'</div><div class="cards" style="display:none">';
@@ -869,6 +870,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
     var l=periodList().filter(function(e){return e.c===cat});
     return '<h2 class="sec">'+esc(cat)+'</h2>'+periodBar()+
       '<div class="cards" style="margin-bottom:14px">'+card('all','catall::'+cat,'Ver todos los planes de '+cat,plural(l.length,'plan','planes'),'Ordenados por día',null,'Ver lista →')+'</div>'+
+      (function(){var cq=cartList().filter(function(x){return x.c===cat});return cq.length?'<section class="rowsec"><div class="rowhead"><div><h2>En cartel</h2><small>Visitas y temporadas largas de esta categoría</small></div></div><div class="hrow">'+cq.map(cartHtml).join('')+'</div></section>':''})()+
       '<h2 class="sec" style="font-size:19px">Elige lugar</h2>'+venueCards(l);
   }
   function viewZone(z){
