@@ -7,7 +7,7 @@
   --azul:#1456b8; --azul2:#0b3a82; --azul-soft:#e5eefb; --sol:#ffb703; --sol-soft:#fff3cf;
   --ok:#157347; --warn:#8a5300; --warn-soft:#fff0cc; --on-azul:#ffffff;
   --c-musica:#2f6bff; --c-teatro:#d6336c; --c-flamenco:#e8590c; --c-danza:#9c36b5;
-  --c-cine:#0c8599; --c-expo:#2f9e44; --c-familiar:#e0a100; --c-otros:#6c7a89;
+  --c-cine:#0c8599; --c-expo:#2f9e44; --c-familiar:#e0a100; --c-otros:#6c7a89; --c-monu:#8a5a2b; --c-herm:#7b3f8c;
   --display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
   --body:'Instrument Sans','Segoe UI',system-ui,sans-serif;
 }
@@ -16,13 +16,13 @@
   --azul:#8db7f5; --azul2:#0f2a52; --azul-soft:#1a3252; --sol:#ffc933; --sol-soft:#3b300f;
   --ok:#6fd19c; --warn:#f3be5c; --warn-soft:#3a2e10; --on-azul:#ffffff;
   --c-musica:#7ea2ff; --c-teatro:#f06595; --c-flamenco:#ff922b; --c-danza:#cc5de8;
-  --c-cine:#3bc9db; --c-expo:#69db7c; --c-familiar:#ffd43b; --c-otros:#9aa8b6; color-scheme:dark}}
+  --c-cine:#3bc9db; --c-expo:#69db7c; --c-familiar:#ffd43b; --c-otros:#9aa8b6; --c-monu:#d9a066; --c-herm:#d08be0; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0b1320; --surface:#142133; --fg:#eaf1f9; --muted:#a2b4c7; --line:#243850;
   --azul:#8db7f5; --azul2:#0f2a52; --azul-soft:#1a3252; --sol:#ffc933; --sol-soft:#3b300f;
   --ok:#6fd19c; --warn:#f3be5c; --warn-soft:#3a2e10; --on-azul:#ffffff;
   --c-musica:#7ea2ff; --c-teatro:#f06595; --c-flamenco:#ff922b; --c-danza:#cc5de8;
-  --c-cine:#3bc9db; --c-expo:#69db7c; --c-familiar:#ffd43b; --c-otros:#9aa8b6; color-scheme:dark}
+  --c-cine:#3bc9db; --c-expo:#69db7c; --c-familiar:#ffd43b; --c-otros:#9aa8b6; --c-monu:#d9a066; --c-herm:#d08be0; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--body);margin:0;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -143,7 +143,7 @@ h2.sec{font:800 24px var(--display);margin:26px 0 4px;letter-spacing:-.01em}
 .panel .lbl:first-of-type{margin-top:16px}
 :root[data-look="papel"]{--bg:#f6efe2;--surface:#fffaf0;--fg:#2b2118;--muted:#6d5d4b;--line:#e3d5bc;--azul:#8a2c1d;--azul2:#5e1a10;--azul-soft:#f6e1da;--on-azul:#fff;--display:Georgia,'Times New Roman',serif;color-scheme:light}
 :root[data-look="papel"] .top{background:linear-gradient(135deg,#5e1a10,#8a2c1d 70%,#b4452f)}
-:root[data-look="noche"]{--bg:#0b1320;--surface:#142133;--fg:#eaf1f9;--muted:#a2b4c7;--line:#243850;--azul:#8db7f5;--azul2:#0f2a52;--azul-soft:#1a3252;--sol:#ffc933;--sol-soft:#3b300f;--warn:#f3be5c;--c-musica:#7ea2ff;--c-teatro:#f06595;--c-flamenco:#ff922b;--c-danza:#cc5de8;--c-cine:#3bc9db;--c-expo:#69db7c;--c-familiar:#ffd43b;--c-otros:#9aa8b6;color-scheme:dark}
+:root[data-look="noche"]{--bg:#0b1320;--surface:#142133;--fg:#eaf1f9;--muted:#a2b4c7;--line:#243850;--azul:#8db7f5;--azul2:#0f2a52;--azul-soft:#1a3252;--sol:#ffc933;--sol-soft:#3b300f;--warn:#f3be5c;--c-musica:#7ea2ff;--c-teatro:#f06595;--c-flamenco:#ff922b;--c-danza:#cc5de8;--c-cine:#3bc9db;--c-expo:#69db7c;--c-familiar:#ffd43b;--c-otros:#9aa8b6; --c-monu:#d9a066; --c-herm:#d08be0;color-scheme:dark}
 :root[data-look="vivo"]{--bg:#fff7ec;--surface:#ffffff;--fg:#1d1330;--muted:#5d5070;--line:#f0dfc8;--azul:#6a1fb8;--azul2:#3c0f7a;--azul-soft:#efe3fb;--on-azul:#fff}
 :root[data-look="vivo"] .top{background:linear-gradient(135deg,#3c0f7a,#6a1fb8 60%,#e8590c)}
 .dates[hidden]{display:none}
@@ -590,7 +590,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
 (function(){
   var D=JSON.parse(document.getElementById('data').textContent);
   var EV=D.events, ONG=D.ongoing, BASEEV=D.events.slice(), EXTRA=[], PED=[], CART=[], dbh=null;
-  var CATBASE={'Música':'--c-musica','Teatro':'--c-teatro','Flamenco':'--c-flamenco','Danza':'--c-danza','Cine':'--c-cine','Exposiciones':'--c-expo','Familiar':'--c-familiar','Ferias y muestras':'--c-ferias','Otros':'--c-otros'};
+  var CATBASE={'Música':'--c-musica','Teatro':'--c-teatro','Flamenco':'--c-flamenco','Danza':'--c-danza','Cine':'--c-cine','Exposiciones':'--c-expo','Familiar':'--c-familiar','Ferias y muestras':'--c-ferias','Monumentos':'--c-monu','Hermandades':'--c-herm','Otros':'--c-otros'};
   var CATS=[],CATVAR={},cnt0={};
   EV.concat(ONG).forEach(function(e){cnt0[e.c]=(cnt0[e.c]||0)+1});
   Object.keys(cnt0).sort(function(x,y){var ix=Object.keys(CATBASE).indexOf(x),iy=Object.keys(CATBASE).indexOf(y);if(ix<0&&iy<0)return cnt0[y]-cnt0[x];if(ix<0)return 1;if(iy<0)return -1;return ix-iy}).forEach(function(c,i){
@@ -783,7 +783,7 @@ window.claude={use:function(){return Promise.resolve({collection:col})}}})();
   }
   function plural(n,a,b){return n+' '+(n===1?a:b)}
   // ---------- tarjetas de navegación ----------
-  var CATIC={'Música':'🎵','Teatro':'🎭','Flamenco':'💃','Danza':'🩰','Cine':'🎬','Exposiciones':'🖼️','Familiar':'🧸','Ferias y muestras':'🎪','Otros':'✨'};
+  var CATIC={'Música':'🎵','Teatro':'🎭','Flamenco':'💃','Danza':'🩰','Cine':'🎬','Exposiciones':'🖼️','Familiar':'🧸','Ferias y muestras':'🎪','Monumentos':'🏛️','Hermandades':'🕊️','Otros':'✨'};
   var SHORT={'Exposiciones':'Expos.','Ferias y muestras':'Ferias'};
   function ic(c){return CATIC[c]||'✦'}
   function card(cls,go,name,n,desc,cv,cta){
